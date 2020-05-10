@@ -1,0 +1,204 @@
+*lsp_bacomp.txt*		      Utilities for LSP backward compatibility
+
+Version:  0.1
+Author:   Thore Weilbier <thore@weilbier.net>
+License:  MIT
+
+==============================================================================
+						*lsp_bacomp_table_of_contents*
+TABLE OF CONTENTS~
+
+Introduction ....................................... |lsp_bacomp_introduction|
+Usage ..................................................... |lsp_bacomp_usage|
+Commands .............................................. |lsp_bacomp_functions|
+Functions ............................................. |lsp_bacomp_functions|
+TODO-List ............................................. |lsp_bacomp_todo_list|
+
+
+==============================================================================
+						     *lsp_bacomp_introduction*
+INTRODUCTION~
+
+This plugin provides functionality to integrate the modern |lsp| functionality
+of NeoVim with backwards compatibility in mind. So there must not always be
+a language server available. For such cases, mappings and other functions
+should fall back to the "old school" approaches. An example would be
+|vim.lsp.buf.definition()| and |:tjump|. But also do not all language servers
+provide the full set of features the protocol specifies. It should be easy to
+check such capabilities and run code conditional.
+
+
+==============================================================================
+						     *lsp_bacomp_introduction*
+USAGE~
+
+Besides the low-level Lua functions this plugin exposes, it mainly provides
+the |:LspBacomp| command. This runs logic conditionally based on the |lsp|
+setup and also allows to define an alternative. Let's demonstrate this quickly
+with some examples: >
+
+  autocmd CursorHold * silent! LspBacomp documentHighlightProvider
+	\ lua\ vim.lsp.buf.document_highlight()
+  autocmd CursorMoved * lua vim.lsp.buf.clear_references()
+
+While the second |autocmd| is just for completeness because it works with and
+without an attached |vim.lsp.client|, the first one requires more attention.
+Using the |:LspBacomp| makes sure that first there is an |vim.lsp.client|
+attached to the current buffer and the connected language server provides the
+`documentHighlightProvider` capability. Without this, the autocommand would
+always fail if one of both is not given.
+
+Another example would be a smart mapping: >
+
+  nnoremap gd <cmd>LspBacomp definitionProvider lua\ vim.lsp.buf.definition()
+      \ execute\ 'tjump\ '.expand('<cword>')<CR>
+
+As for the example before this will check if there is a |vim.lsp.client| and
+the required capability is provided. If so, the language server will be used
+to jump to the definition of the word under the cursor. But in contrast to the
+earlier example does this mapping define an alternative command. If it can't
+execute the primary command, the second provided gets used. In this case it
+might look a bit complicated due to the syntax, but in fact is just calls the
+|:tjump| command for the word under the cursor to search for a definition in
+a tag file.
+
+
+==============================================================================
+							 *lsp_bacomp_commands*
+COMMANDS~
+
+								  *:LspBacomp*
+
+|:LspBackomp {provider_name} {primary_command} [{alternative_command}]|
+
+  Runs an ex-command conditionally. It checks if a |vim.lsp.client| is
+  attached to the current buffer. If so, it verifies if the connected server
+  provides the defined {provider_name}. If both requirements are matched it
+  runs the {primary_command}. If only the required provider is not given, it
+  does nothing, reporting it to the user. For the case that there is no
+  |vim.lsp.client| available, the optional {alternative_command} gets
+  executed.
+
+
+  Parameter:~
+
+    {provider_name}	  - the capability the language server must provide
+
+    {primary_command}	  - ex-command to run when all requirements are
+			    matched
+
+    {alternative_command} - ex-command to run when requirements are not
+			    matched (optional)
+
+
+    You can check the LSP specification to get the {provider_name}s. But since
+    not all are supported by NeoVim, it is recommended to use:
+    `lua print(vim.inspect(require'lsp_bacomp.lsp_provider_names'))`
+
+    Ex-commands must use backslashes to use spaces in-between a command
+    string (checkout |<f-args>|). E.g.: `MyCommand\ arg1`. A not escaped space
+    will lead to a new argument of the |:LspBacomp| command, not the
+    {primary_command} or {alternative_command}
+
+    Use the |silent| command prefix to suppress warning messages that
+    a required server capability is not provided. This is especially useful
+    for auto-commands, while it could be still nice to see them for mappings.
+
+
+==============================================================================
+							*lsp_bacomp_functions*
+FUNCTIONS~
+
+The listed functions can be used to tweak your own logic around language
+server availability and capability. Checkout |lua| how to integrate them into
+your configuration setup.
+
+						  *lsp_bacomp.smart_command()*
+
+smart_command({provider_name}, {primary_command}, {alternative_command})
+
+  Checkout the detailed description for the |:LspBacpmp| command. This is just
+  the backend implementation. The {alternative_command} argument can be
+  omitted or set to `nil`.
+
+
+
+
+					      *lsp_bacomp.check_capability()*
+check_capability({provider_name})
+
+  Verifies if a to the current buffer attached |vim.lsp.client| provides the
+  given capability. All supported {provider_names} are listed in
+  `lsp_bacomp.lsp_provider_names`. Prints a user message if a unknown or not
+  supported capability was requested.
+
+    Parameter:~
+
+      {provider_name} - the to verify server capability
+
+
+    Returns:~
+
+      `v:false`/`false`	- if no |vim.lsp.client| is attached to the buffer,
+			  the {provider_name} is unknown or not supported, or
+			  if the connected server does not provide this
+			  capability.
+
+      `v:true`/`true`	- if the to the |vim.lsp.client| connected language
+			  server provides the requested capability
+
+
+The following functions need no arguments and do all return a boolean value.
+In fact are most of them shortcuts to avoid the need of chunky code snippets
+and allow simple condition blocks.
+
+
+
+					       *lsp_bacomp.client_available()*
+client_available()
+
+					  *lsp_bacomp.client_provides_hover()*
+client_provides_hover()
+
+				 *lsp_bacomp.client_provides_signature_help()*
+client_provides_signature_help()
+
+				     *lsp_bacomp.client_provides_definition()*
+client_provides_definition()
+
+				 *lsp_bacomp.client_provides_implementation()*
+client_provides_implementation()
+
+				     *lsp_bacomp.client_provides_references()*
+client_provides_references()
+
+				*lsp_bacomp.client_provides_document_symbol()*
+client_provides_document_symbol()
+
+				*lsp_bacomp.client_provides_workspace_symbol()*
+client_provides_workspace_symbol()
+
+				    *lsp_bacomp.client_provides_code_action()*
+client_provides_code_action()
+
+				      *lsp_bacomp.client_provides_highlight()*
+client_provides_highlight()
+
+				     *lsp_bacomp.client_provides_formatting()*
+client_provides_formatting()
+
+			       *lsp_bacomp.client_provides_range_formatting()*
+client_provides_range_formatting()
+
+==============================================================================
+						    *lsp_bacomp_todo_list*
+TODO-List~
+
+  - improve ex-command interpretation and simplify it
+  - NeoVim PR to add missing capabilities (especially `typeDefinitionProvider`
+    and `declarationProvider`)
+
+
+==============================================================================
+
+vim:tw=78:ts=8:noet:ft=help:norl:
