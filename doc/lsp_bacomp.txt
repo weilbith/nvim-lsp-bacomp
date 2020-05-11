@@ -37,9 +37,9 @@ the |:LspBacomp| command. This runs logic conditionally based on the |lsp|
 setup and also allows to define an alternative. Let's demonstrate this quickly
 with some examples: >
 
-  autocmd CursorHold * silent! LspBacomp documentHighlightProvider
+  autocmd! CursorHold * silent! LspBacomp documentHighlightProvider
 	\ lua\ vim.lsp.buf.document_highlight()
-  autocmd CursorMoved * lua vim.lsp.buf.clear_references()
+  autocmd! CursorMoved * lua vim.lsp.buf.clear_references()
 
 While the second |autocmd| is just for completeness because it works with and
 without an attached |vim.lsp.client|, the first one requires more attention.
@@ -197,6 +197,8 @@ TODO-List~
   - improve ex-command interpretation and simplify it
   - NeoVim PR to add missing capabilities (especially `typeDefinitionProvider`
     and `declarationProvider`)
+  - improve command execution to make failures more obvious to be not part of
+    this plugin, but related to a failed command
 
 
 ==============================================================================
