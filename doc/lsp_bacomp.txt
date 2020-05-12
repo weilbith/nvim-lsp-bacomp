@@ -29,7 +29,7 @@ check such capabilities and run code conditional.
 
 
 ==============================================================================
-						     *lsp_bacomp_introduction*
+							    *lsp_bacomp_usage*
 USAGE~
 
 Besides the low-level Lua functions this plugin exposes, it mainly provides
