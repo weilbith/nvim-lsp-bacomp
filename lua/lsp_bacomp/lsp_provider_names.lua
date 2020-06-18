@@ -1,7 +1,9 @@
 local lsp_provider_names = {}
 lsp_provider_names["hover_provider"] = "hoverProvider"
 lsp_provider_names["signature_help_provider"] = "signatureHelpProvider"
+lsp_provider_names["declaration_provider"] = "declarationProvider"
 lsp_provider_names["definition_provider"] = "definitionProvider"
+lsp_provider_names["type_definition_provider"] = "typeDefinitionProvider"
 lsp_provider_names["implementation_provider"] = "implementationProvider"
 lsp_provider_names["references_provider"] = "referencesProvider"
 lsp_provider_names["document_symbol_provider"] = "documentSymbolProvider"
@@ -15,8 +17,6 @@ return lsp_provider_names
 
 -- Not supported yet:
 -- completionProvider
--- declarationProvider
--- typeDefinitionProvider
 -- codeLensProvider
 -- documentLinkProvider
 -- colorProvider

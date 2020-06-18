@@ -51,8 +51,16 @@ function M.client_provides_signature_help()
     return M.check_capability(lsp_provider_names.signature_help_provider)
 end
 
+function M.client_provides_declaration()
+    return M.check_capability(lsp_provider_names.declaration_provider)
+end
+
 function M.client_provides_definition()
     return M.check_capability(lsp_provider_names.definition_provider)
+end
+
+function M.client_provides_type_definition()
+    return M.check_capability(lsp_provider_names.type_definition_provider)
 end
 
 function M.client_provides_implementation()
