@@ -22,7 +22,7 @@ function M.check_capability(provider_name)
         return false
     end
 
-    -- TODO: Handle multiple clients and merge their properties.
+    -- TODO: Handle multiple clients better
     local resolved_capabilities = lsp.buf_get_clients()[1].resolved_capabilities
     return resolved_capabilities[capability_name] or false
 end
